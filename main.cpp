@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
   	command = car["command"].GetString();
       makefile << command.substr(2);
       makefile << " -H ";
+      makefile << "-fsyntax-only ";
       makefile << std::endl;
   }
 
