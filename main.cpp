@@ -21,23 +21,47 @@ int main(int argc, char* argv[]) {
   std::ifstream in_comp_db_json;
   std::string line = "";
   std::ofstream out_comp_db_json("tmpJson.json");
-  std::string json_dir = "";
-  std::string json_file_path = "";
-  std::string compiler_command = "gcc";
+  std::string json_dir = "./";
+  std::string json_file_path = "./compile_commands.json";
+  std::string compiler_command = "";
+  std::string json_compiler_name = "";
 
-  if (argc > 3)
+  //parse arguments for options
+  if (argc > 1)
   {
-    json_file_path = std::string(argv[1]) + std::string(argv[2]);
-    in_comp_db_json.open(json_file_path);
-    json_dir = argv[1];
-    compiler_command = argv[3];
+    for (int i = 1; i < argc; i++ )
+    {
+      std::string argument_str = std::string(argv[i]);
+      if (argument_str.compare("-f") == 0)
+      {
+        json_file_path = std::string(argv[i+1]);
+        
+        std::size_t found = json_file_path.find_last_of("/");
+        json_dir = json_file_path.substr(0,found);
+      }
+      else if (argument_str.compare("-p") == 0)
+      {
+        compiler_command = std::string(argv[i+1]);
+      }
+      else if (argument_str.compare("-h") == 0)
+      {
+        std::cout << std::endl << "Using: ./include-explorer [-f path/to/json/file/dir/json_file_name.json] [-p compiler_prefix]" << std::endl;
+        std::cout << "-f - full path to json file with compile commands. Default: \"./compile_commands.json\"" << std::endl;
+        std::cout << "-p - full path to compiler prefix. Default: \"\"" << std::endl;
+        std::cout << "Example : ./include-explorer -f test/compile_commands.json -p /opt/arm-linux-gnueabihf/arm-linux-gnueabihf-" << std::endl << std::endl;
+        return -1;
+      }
+    }
   }
   else
   {
-    std::cout << std::endl << "Using: ./include-explorer path/to/json/file/dir/ json_file_name.json compiler_command" << std::endl;
-    std::cout << "Example : ./include-explorer test compile_commands.json gcc" << std::endl << std::endl;
-    return 0;
+      std::cout << std::endl << "**************   include-explorer use defaults values   **************" << std::endl << std::endl;
+      std::cout << "-f = \"./compile_commands.json\"" << std::endl;
+      std::cout << "-p = \"\"" << std::endl;
+      std::cout << std::endl << "**********************************************************************" << std::endl << std::endl;
   }
+
+  in_comp_db_json.open(json_file_path);
 
   if (in_comp_db_json.is_open())
   {
@@ -73,7 +97,8 @@ int main(int argc, char* argv[]) {
   std::ofstream makefile("tmpMakefile");
 
 
-  makefile << "CC=" << compiler_command << std::endl << std::endl;
+  makefile << "CC=" << compiler_command << "gcc" << std::endl << std::endl;
+  makefile << "CXX=" << compiler_command << "g++" << std::endl << std::endl;
   makefile << "all:" << std::endl;
 
 
@@ -83,13 +108,29 @@ int main(int argc, char* argv[]) {
 
   	//path to sources where "bear make" had been launched first time
   	makefile << "cd " << json_dir << " && ";
+
+    command = record["command"].GetString();
     
-  	makefile << "$(CC)";
-  	command = record["command"].GetString();
-      makefile << command.substr(2);
-      makefile << " -H ";
-      makefile << "-fsyntax-only ";
-      makefile << std::endl;
+    json_compiler_name = command.substr(0,3);
+    if (json_compiler_name.compare("cc ") == 0)
+    {
+      makefile << "$(CC)";
+    }
+    else if (json_compiler_name.compare("c++") == 0)
+    {
+      makefile << "$(CXX)";
+    }
+    else
+    {
+      std::cout << "Error. Unknown compiler command in json file: " << json_compiler_name << std::endl;
+      return -1;
+    }
+
+    makefile << " ";
+    makefile << command.substr(3);
+    makefile << " -H ";
+    makefile << "-fsyntax-only ";
+    makefile << std::endl;
   }
 
   makefile.close();
