@@ -78,13 +78,14 @@ int main(int argc, char* argv[]) {
 
 
   std::string command = "";
-  for (auto& car : a.GetArray()) {
+  for (auto& record : a.GetArray()) {
   	makefile << "\t";
 
   	//path to sources where "bear make" had been launched first time
   	makefile << "cd " << json_dir << " && ";
+    
   	makefile << "$(CC)";
-  	command = car["command"].GetString();
+  	command = record["command"].GetString();
       makefile << command.substr(2);
       makefile << " -H ";
       makefile << "-fsyntax-only ";
