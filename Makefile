@@ -6,6 +6,7 @@ all:
 install:
 	mkdir -p /opt/include-explorer
 	cp include-explorer /opt/include-explorer
+	rm /usr/local/bin/include-explorer
 	ln -s /opt/include-explorer/include-explorer /usr/local/bin/include-explorer
 
 .PHOHY: prepare_test
