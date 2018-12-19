@@ -110,8 +110,10 @@ int main(int argc, char* argv[]) {
   	directory = record["directory"].GetString();
   	makefile << "cd " << directory << " && ";
 
+    //read command from json file
     command = record["command"].GetString();
     
+    //write gcc/g++ command instead cc/c++ 
     json_compiler_name = command.substr(0,3);
     if (json_compiler_name.compare("cc ") == 0)
     {
@@ -188,7 +190,7 @@ int main(int argc, char* argv[]) {
   system("make -f tmpMakefile 2>&1 | grep '^\\..\\+ ' | sort -u");
 
   std::cout << std::endl;
-  std::cout << "Finish. To see full output run 'make -f tmpMakefile'." << std::endl;
+  std::cout << "Finish. To see full output or gcc messages run 'make -f tmpMakefile'." << std::endl;
   
   return 1;
 
