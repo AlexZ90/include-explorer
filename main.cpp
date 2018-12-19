@@ -103,11 +103,12 @@ int main(int argc, char* argv[]) {
 
 
   std::string command = "";
+  std::string directory = "";
   for (auto& record : a.GetArray()) {
   	makefile << "\t";
 
-  	//path to sources where "bear make" had been launched first time
-  	makefile << "cd " << json_dir << " && ";
+  	directory = record["directory"].GetString();
+  	makefile << "cd " << directory << " && ";
 
     command = record["command"].GetString();
     
