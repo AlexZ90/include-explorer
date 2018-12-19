@@ -43,4 +43,21 @@ It seems that preprocessor takes foo3.h, preprocess it (and removes all includes
 
 Solution:
 	- Include guards can not be fixed. So we will see includes that are needed for some file but it is possible that include file will be inside another file not in target file. Include file from target file will be discarded because of include guards.
-	- -include option can be removed and file from -include option will be placed to the first line of target file.
+	- -include option can be removed and file from -include option will be moved to the first line of target file.
+
+#Macro #error vs make -f tmpMakefile
+make -f tmpMakefile faile while compile python:
+
+```bash
+alex@alex:~/output/build/host-python-markupsafe-1.0$ cd /home/alex/output/build/host-python-markupsafe-1.0 && /home/alex/output/host/bin/arm-linux-gnueabihf-gcc -pthread -fno-strict-aliasing -O2 -I/home/alex/output/host/include -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes -fPIC -I/home/alex/output/host/include/python2.7 /home/alex/output/build/host-python-markupsafe-1.0/markupsafe/_speedups.c -H -fsyntax-only
+```
+
+```bash
+In file included /output/host/include/python2.7/Python.h:61:0,
+                 /output/build/host-python-markupsafe-1.0/markupsafe/_speedups.c:12:
+/output/host/include/python2.7/pyport.h:895:2: warning: #warning "LONG_BIT definition appears wrong for platform (bad gcc/glibc config?)." [-Wcpp]
+ #error "LONG_BIT definition appears wrong for platform (bad gcc/glibc config?)."
+  ^~~~~~~
+```
+
+Don't know how to fix that. This error make 'make -f tmpMakefile' to exit. If -H is not used, but -MM -MG are used - there is no such error, but output is different.
