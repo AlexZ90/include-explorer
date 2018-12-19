@@ -142,6 +142,18 @@ int main(int argc, char* argv[]) {
       search_start_pos = inc_opt_start_pos + 5;
       std::cout << inc_filename << std::endl;
     }
+
+    //process \" in macro definition in gcc command (-D=\"Hello World\")
+    search_start_pos = 0;
+    size_t start_pos = 0;
+    search_pattern = std::string("\\\"");
+    while ((start_pos = command.find("\\\"", search_start_pos)) != std::string::npos)
+    {
+      command.replace(start_pos,2,"\"\\\"");
+      search_start_pos = start_pos + 2;
+    }
+
+    //write the rest of the command
     makefile << " ";
     makefile << command.substr(3);
     makefile << " -H ";
