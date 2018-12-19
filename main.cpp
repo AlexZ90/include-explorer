@@ -126,6 +126,22 @@ int main(int argc, char* argv[]) {
       return -1;
     }
 
+    //process -include option
+    size_t search_start_pos = 0;
+    size_t inc_opt_start_pos = 0;
+    size_t inc_filename_start_pos = 0;
+    size_t inc_filename_end_pos = 0;
+    std::string search_pattern = std::string(" -include ");
+    std::string inc_filename = "";
+    while ((inc_opt_start_pos = command.find(search_pattern, search_start_pos)) != std::string::npos)
+    {
+      inc_filename_start_pos = command.find_first_not_of(" ",inc_opt_start_pos + 10);
+      inc_filename_end_pos = command.find_first_of(" ",inc_filename_start_pos + 1);
+      inc_filename = command.substr(inc_filename_start_pos, inc_filename_end_pos - inc_filename_start_pos);
+      //inc_filename = command.substr(inc_filename_start_pos, 10);
+      search_start_pos = inc_opt_start_pos + 5;
+      std::cout << inc_filename << std::endl;
+    }
     makefile << " ";
     makefile << command.substr(3);
     makefile << " -H ";
