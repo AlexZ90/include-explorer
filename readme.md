@@ -21,12 +21,11 @@
 * Собрать из исходников и установить Bear (по инструкции из репозитория).
 * Перейти в директорию некоторого проекта, в котором планируется запускать make, и выполнить команду `bear make`. В результате в директории проекта появится файл `compile_commands.json` с записанными командами gcc.
 * Запустить include-explorer, указав:
-	* путь к сгенерированному json-файлу,
-	* имя сгенерированного json-файла,
-	* команда компилятора,
-	* формат: `./include-explorer path/to/json/file/dir/ json_file_name.json compiler_command`.
+	* опцию -f "путь к сгенерированному json-файлу c указанием имени" (обязательно наличие '/') (по умолчанию "./compile_commands.json"),
+	* опцию -p "префикс для компилятора" (опционально, по умолчанию пустая строка),
+	* формат: `./include-explorer -f path/to/json/file/dir/json_file_name.json -p compiler_prefix`.
 
-Директория test содержит тестовый проект на С. Для тестового запуска необходимо в директории include-explorer выполнить команду `make prepare_test`, а затем команду `./include-explorer test/ compile_commands.json gcc`.
+Директория test содержит тестовый проект на С. Для тестового запуска необходимо в директории include-explorer выполнить команду `make prepare_test`, а затем команду `./include-explorer -f test/compile_commands.json`.
 
 
 
