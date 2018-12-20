@@ -261,7 +261,9 @@ int main(int argc, char* argv[]) {
 					for (int i = 0; i < includeFilesNum; i++)
 					{
 						if ((!includeFilesTree[i].is_system) ||
-								((includeFilesTree[i].is_system) && (!includeFilesTree[includeFilesTree[i].parent_num].is_system)))
+								(includeFilesTree[i].is_system && (!includeFilesTree[includeFilesTree[i].parent_num].is_system)) ||
+								(includeFilesTree[i].is_system && (includeFilesTree[i].level == 1))
+							)
 						{
 							/*debug print
 							result_file << includeFilesTree[i].is_system << " ";
