@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 
 	std::ifstream file_to_analyze;
 	std::ofstream result_file("include-explorer-result.txt");
+	std::ofstream direct_includes_file("include-explorer-direct-includes.txt");
 	std::string file_to_analyze_path = "./tmpMakefileResult.txt";
 	int analyze_flag = 0;
 	int processing_includes = 0;
@@ -148,7 +149,6 @@ int main(int argc, char* argv[]) {
 		std::string directory = "";
 		std::string file = "";
 		//int commandsCount = a.Size(); ////to output file number
-		std::cout << "-include files list:" << std::endl;
 		for (auto& record : a.GetArray()) {
 
 			//makefile << "\t" << "@echo " << i++ << "/" << commandsCount << std::endl;     //to output file number
@@ -178,6 +178,8 @@ int main(int argc, char* argv[]) {
 				return -1;
 			}
 
+			//show includes that directly comes from gcc command
+			//because they might not been shown after preprocessing or after using -H option
 			//process -include option
 			size_t search_start_pos = 0;
 			size_t inc_opt_start_pos = 0;
@@ -185,6 +187,8 @@ int main(int argc, char* argv[]) {
 			size_t inc_filename_end_pos = 0;
 			std::string search_pattern = std::string(" -include ");
 			std::string inc_filename = "";
+
+			direct_includes_file << "command: " << command << std::endl;
 			while ((inc_opt_start_pos = command.find(search_pattern, search_start_pos)) != std::string::npos)
 			{
 				inc_filename_start_pos = command.find_first_not_of(" ",inc_opt_start_pos + 10);
@@ -192,7 +196,7 @@ int main(int argc, char* argv[]) {
 				inc_filename = command.substr(inc_filename_start_pos, inc_filename_end_pos - inc_filename_start_pos);
 				//inc_filename = command.substr(inc_filename_start_pos, 10);
 				search_start_pos = inc_opt_start_pos + 5;
-				std::cout << inc_filename << std::endl;
+				direct_includes_file << inc_filename << std::endl;
 			}
 
 			//process \" in macro definition in gcc command (-D=\"Hello World\")
@@ -213,22 +217,11 @@ int main(int argc, char* argv[]) {
 			makefile << std::endl;
 		}
 
+		direct_includes_file.close();
 		makefile.close();
 
 		//Perform generated Makefile
-
-		//show includes that directly comes from gcc command
-		//because they are not shown after preprocessing or after using -H option
-
-		std::cout << std::endl;
-		std::cout << "Includes that come directly from gcc command:" << std::endl;
-
-		system("make -f tmpMakefile 2>&1 |  grep --color \"\\-include\"");
-
-		std::cout << std::endl << "Other levels includes:" << std::endl;
-		//show other levels includes that contains some keyword (for example "lima")
-		//system("make -f tmpMakefile 2>&1 | grep '^\\.\\+ ' | grep lima | sort -u");
-		system("make -f tmpMakefile");
+		system("make -f tmpMakefile > tmpMakefileResult.txt 2>&1");
 
 		std::cout << std::endl;
 		std::cout << "Finish." << std::endl;
@@ -243,13 +236,6 @@ int main(int argc, char* argv[]) {
 
 		if (file_to_analyze.is_open())
 		{
-
-			//search for Other levels includes
-			while ( getline (file_to_analyze,line) )
-			{
-				if (line.find ("Other levels") != std::string::npos)
-					break;
-			}
 
 			while ( getline (file_to_analyze,line) )
 			{
