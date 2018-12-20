@@ -146,11 +146,13 @@ int main(int argc, char* argv[]) {
 
 		std::string command = "";
 		std::string directory = "";
+		std::string file = "";
 		//int commandsCount = a.Size(); ////to output file number
 		std::cout << "-include files list:" << std::endl;
 		for (auto& record : a.GetArray()) {
 
-			//makefile << "\t" << "$echo " << i++ << "/" << commandsCount << std::endl;     //to output file number
+			//makefile << "\t" << "@echo " << i++ << "/" << commandsCount << std::endl;     //to output file number
+			makefile << "\t" << "@echo \"file: " << record["file"].GetString() << "\"" << std::endl;     //to output file number
 
 			makefile << "\t";
 
@@ -251,11 +253,21 @@ int main(int argc, char* argv[]) {
 
 			while ( getline (file_to_analyze,line) )
 			{
-				if (line.find ("cd ") == 0)
+				if (line.find ("file: ") == 0)
 				{
+					result_file << std::endl << std::endl;
+					result_file << line << std::endl;
+
+					//get path from cd command
+					getline (file_to_analyze,line);
+					cd_start_pos = line.find("cd", 0);
+					file_path_start_pos = line.find_first_of(" ",0) + 1;
+					file_path_end_pos = line.find_first_of(" ",file_path_start_pos);
+					file_path = line.substr(file_path_start_pos, file_path_end_pos - file_path_start_pos);
+
 					processing_includes = 1;
 					includeFilesNum = 0; //clear counter of includes in includeFilesTree
-					result_file << std::endl << std::endl;
+					continue;
 				}
 				else if (line.find ("Multiple ") != std::string::npos)
 				{
@@ -278,77 +290,66 @@ int main(int argc, char* argv[]) {
 
 				if(!processing_includes)
 					continue;
-				else
+				else //processing include file
 				{
 
-					if (line.find ("cd ") == 0) //get path from cd command
+					//get include file path
+					include_file_start_pos = line.find_first_of(" ",0) + 1;
+					include_file_end_pos = line.find_first_of(" ",include_file_start_pos);
+					include_file_path = line.substr(include_file_start_pos, include_file_end_pos - include_file_start_pos);
+					if (include_file_path.find("/") != 0) //add directory path if include file path is relative
+						include_file_path = file_path + "/" + include_file_path;
+
+					//get include file level
+					include_file_level_str = line.substr(0,line.find_first_of(" ",0));
+					include_file_level_num = include_file_level_str.length();
+					//result_file << include_file_level_str << " " << include_file_level_num <<  std::endl;
+
+					//define if file is in target directory
+					if (include_file_path.find(target_directory,0) != std::string::npos)
 					{
-						cd_start_pos = line.find("cd", 0);
-						file_path_start_pos = line.find_first_of(" ",0) + 1;
-						file_path_end_pos = line.find_first_of(" ",file_path_start_pos);
-						file_path = line.substr(file_path_start_pos, file_path_end_pos - file_path_start_pos);
-						//result_file << file_path << std::endl;
+						include_file_is_system = 0;
 					}
-					else //processing include file
+					else
 					{
-						//get include file path
-						include_file_start_pos = line.find_first_of(" ",0) + 1;
-						include_file_end_pos = line.find_first_of(" ",include_file_start_pos);
-						include_file_path = line.substr(include_file_start_pos, include_file_end_pos - include_file_start_pos);
-						if (include_file_path.find("/") != 0) //add directory path if include file path is relative
-							include_file_path = file_path + "/" + include_file_path;
+						include_file_is_system = 1;
+					}
 
-						//get include file level
-						include_file_level_str = line.substr(0,line.find_first_of(" ",0));
-						include_file_level_num = include_file_level_str.length();
-						//result_file << include_file_level_str << " " << include_file_level_num <<  std::endl;
-
-						//define if file is in target directory
-						if (include_file_path.find(target_directory,0) != std::string::npos)
+					//calculate parent_num
+					if (includeFilesNum == 0)
+					{
+						parent_num = 0;
+					}
+					else
+					{
+						for (int i = includeFilesNum - 1; i > 0; i--)
 						{
-							include_file_is_system = 0;
-						}
-						else
-						{
-							include_file_is_system = 1;
-						}
-
-						//calculate parent_num
-						if (includeFilesNum == 0)
-						{
-							parent_num = 0;
-						}
-						else
-						{
-							for (int i = includeFilesNum - 1; i > 0; i--)
+							if (includeFilesTree[i].level == include_file_level_num)
 							{
-								if (includeFilesTree[i].level == include_file_level_num)
-								{
-									parent_num = includeFilesTree[i].parent_num;
-									break;
-								}
-								else if (include_file_level_num == (includeFilesTree[i].level + 1))
-								{
-									parent_num = i;
-									break;
-								}
+								parent_num = includeFilesTree[i].parent_num;
+								break;
+							}
+							else if (include_file_level_num == (includeFilesTree[i].level + 1))
+							{
+								parent_num = i;
+								break;
 							}
 						}
-
-						includeFilesTree[includeFilesNum].level = include_file_level_num;
-						includeFilesTree[includeFilesNum].path = include_file_path;
-						includeFilesTree[includeFilesNum].is_system = include_file_is_system;
-						includeFilesTree[includeFilesNum].parent_num = parent_num;
-						includeFilesNum++;
-						if (includeFilesNum > 1024)
-						{
-							std::cout << "Too many include files in array. Increase possible max count." << std::endl;
-							exit (-1);
-						}
-
-						//result_file << include_file_path << std::endl;
-						//result_file << line << std::endl;
 					}
+
+					includeFilesTree[includeFilesNum].level = include_file_level_num;
+					includeFilesTree[includeFilesNum].path = include_file_path;
+					includeFilesTree[includeFilesNum].is_system = include_file_is_system;
+					includeFilesTree[includeFilesNum].parent_num = parent_num;
+					includeFilesNum++;
+					if (includeFilesNum > 1024)
+					{
+						std::cout << "Too many include files in array. Increase possible max count." << std::endl;
+						exit (-1);
+					}
+
+					//result_file << include_file_path << std::endl;
+					//result_file << line << std::endl;
 				}
 			}
 
