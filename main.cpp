@@ -106,6 +106,7 @@ int main(int argc, char* argv[]) {
   std::string command = "";
   std::string directory = "";
   //int commandsCount = a.Size(); ////to output file number 
+  std::cout << "-include files list:" << std::endl;
   for (auto& record : a.GetArray()) {
 
     //makefile << "\t" << "$echo " << i++ << "/" << commandsCount << std::endl;     //to output file number
@@ -181,21 +182,13 @@ int main(int argc, char* argv[]) {
 
   system("make -f tmpMakefile 2>&1 |  grep --color \"\\-include\"");
   
-  std::cout << std::endl;
-  std::cout << "First level includes (includes that are in source file compiled with gcc):" << std::endl;
-  
-  //show first level includes, i.e. includes that are in source file compiled with gcc
-  system("make -f tmpMakefile 2>&1 | grep '^\\. ' | sort -u");
-  
-
-  std::cout << std::endl;
-  std::cout << "Other levels includes:" << std::endl;
+  std::cout << std::endl << "Other levels includes:" << std::endl;
   //show other levels includes that contains some keyword (for example "lima")
   //system("make -f tmpMakefile 2>&1 | grep '^\\.\\+ ' | grep lima | sort -u");
-  system("make -f tmpMakefile 2>&1 | grep '^\\..\\+ ' | sort -u");
+  system("make -f tmpMakefile");
 
   std::cout << std::endl;
-  std::cout << "Finish. To see full output or gcc messages run 'make -f tmpMakefile'." << std::endl;
+  std::cout << "Finish." << std::endl;
   
   return 1;
 

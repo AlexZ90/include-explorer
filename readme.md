@@ -33,27 +33,80 @@
 При запуске приложения в директории создаются два временных файла, которые можно удалить: tmpJson.json, tmpMakefile.
 Выводятся следующие уровни включения заголовочных файлов:
 - Заголовочные файлы, включенные в команде gcc с помощью опции `-include`.
-- Заголовочные файлы первого уровня - файлы, которые включаются в C-файлы, которые компилируются с помощью команды gcc.
-- Заголовочные файлы остальных уровней вложения.
+- Команды, содержащие опции `-include`.
+- Результат выполнения команды -H компилятора для всех скомпилированных файлов.
 
 Пример вывода:
 ```bash
 alex@alex:~/Downloads/rapidjson-test/include-explorer$ ./include-explorer test/ compile_commands.json gcc
+-include files list:
+./include/foo3/foo3.h
+./include/foo3/foo3.h
+./include/foo3/foo3.h
+./include/foo3/foo3.h
 
 Includes that come directly from gcc command:
-cd test/ && gcc -c -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/rapidjson-test/include-explorer/test/src/foo1.c -H 
-cd test/ && gcc -c -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/rapidjson-test/include-explorer/test/src/foo2.c -H 
-cd test/ && gcc -c -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/rapidjson-test/include-explorer/test/src/foo3.c -H 
-cd test/ && gcc -c -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/rapidjson-test/include-explorer/test/src/main.c -H 
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/foo1.c -H -fsynta
+x-only 
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/foo2.c -H -fsynta
+x-only 
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/foo3.c -H -fsynta
+x-only 
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/main.c -H -fsynta
+x-only 
 
-First level includes (includes that are in source file compiled with gcc):
-. include/foo1/foo1.h
-. include/foo2/foo2.h
+
 
 Other levels includes:
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/foo1.c -H -fsyntax-only 
+x ././include/foo3/foo3.h.gch
+. include/foo2/foo2.h
+Multiple include guards may be useful for:
+././include/foo3/foo3.h
+/usr/include/wchar.h
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h
+/usr/include/x86_64-linux-gnu/bits/typesizes.h
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h
+/usr/include/x86_64-linux-gnu/gnu/stubs.h
+include/foo2/foo2.h
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/foo2.c -H -fsyntax-only 
+x ././include/foo3/foo3.h.gch
+Multiple include guards may be useful for:
+././include/foo3/foo3.h
+/usr/include/wchar.h
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h
+/usr/include/x86_64-linux-gnu/bits/typesizes.h
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h
+/usr/include/x86_64-linux-gnu/gnu/stubs.h
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/foo3.c -H -fsyntax-only 
+x ././include/foo3/foo3.h.gch
+Multiple include guards may be useful for:
+././include/foo3/foo3.h
+/usr/include/wchar.h
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h
+/usr/include/x86_64-linux-gnu/bits/typesizes.h
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h
+/usr/include/x86_64-linux-gnu/gnu/stubs.h
+cd /home/alex/Downloads/git/include-explorer/test && gcc -c -DSTR="\"Hello World"\" -DERROR_PRAGMA_TEST -I include/foo1/ -I include/foo2/ -include ./include/foo3/foo3.h /home/alex/Downloads/git/include-explorer/test/src/main.c -H -fsyntax-only 
+x ././include/foo3/foo3.h.gch
+. include/foo1/foo1.h
 .. include/foo2/foo2.h
+Multiple include guards may be useful for:
+././include/foo3/foo3.h
+/usr/include/wchar.h
+/usr/include/x86_64-linux-gnu/bits/stdio_lim.h
+/usr/include/x86_64-linux-gnu/bits/sys_errlist.h
+/usr/include/x86_64-linux-gnu/bits/typesizes.h
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h
+/usr/include/x86_64-linux-gnu/gnu/stubs.h
+include/foo1/foo1.h
+include/foo2/foo2.h
 
-Finish. To see full output run 'make -f tmpMakefile'.
+Finish.
+
 
 ```
 
