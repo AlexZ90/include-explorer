@@ -1,11 +1,12 @@
 RAPIDJSON_DIR=/home/alex/Downloads/git/rapidjson
 
 all:
-	g++ -o include-explorer -std=c++11 main.cpp -I${RAPIDJSON_DIR}/include/
+	mkdir -p bin
+	g++ -o bin/include-explorer -std=c++11 src/*.cpp -I${RAPIDJSON_DIR}/include/
 
 install:
 	mkdir -p /opt/include-explorer
-	cp include-explorer /opt/include-explorer
+	cp bin/include-explorer /opt/include-explorer
 	rm /usr/local/bin/include-explorer
 	ln -s /opt/include-explorer/include-explorer /usr/local/bin/include-explorer
 
