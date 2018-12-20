@@ -188,7 +188,9 @@ int main(int argc, char* argv[]) {
 			std::string search_pattern = std::string(" -include ");
 			std::string inc_filename = "";
 
-			direct_includes_file << "command: " << command << std::endl;
+			if (command.find(search_pattern, search_start_pos) != std::string::npos)
+				direct_includes_file << "command: " << command << std::endl;
+
 			while ((inc_opt_start_pos = command.find(search_pattern, search_start_pos)) != std::string::npos)
 			{
 				inc_filename_start_pos = command.find_first_not_of(" ",inc_opt_start_pos + 10);
