@@ -25,6 +25,7 @@ int main(int argc, char* argv[]) {
   std::string json_file_path = "./compile_commands.json";
   std::string compiler_command = "";
   std::string json_compiler_name = "";
+  int i = 0;
 
   //parse arguments for options
   if (argc > 1)
@@ -104,7 +105,11 @@ int main(int argc, char* argv[]) {
 
   std::string command = "";
   std::string directory = "";
+  //int commandsCount = a.Size(); ////to output file number 
   for (auto& record : a.GetArray()) {
+
+    //makefile << "\t" << "$echo " << i++ << "/" << commandsCount << std::endl;     //to output file number
+
   	makefile << "\t";
 
   	directory = record["directory"].GetString();
