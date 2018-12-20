@@ -2,6 +2,8 @@
 #error "Test error"
 #endif
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "foo1.h"
 
 
