@@ -141,7 +141,6 @@ int main(int argc, char* argv[]) {
 
 		std::ofstream makefile("tmpMakefile");
 
-
 		makefile << "CC=" << compiler_command << "gcc" << std::endl << std::endl;
 		makefile << "CXX=" << compiler_command << "g++" << std::endl << std::endl;
 		makefile << "all:" << std::endl;
@@ -161,8 +160,9 @@ int main(int argc, char* argv[]) {
 			if (file.find("/") != 0) //relative file name
 				file = directory + "/" + file;
 
-			makefile << "\t" << "@echo \"file: " << file << "\"" << std::endl;     //to output file number
 
+
+			makefile << "\t" << "@echo \"file: " << file << "\"" << std::endl;     //to output file number
 			makefile << "\t";
 
 			makefile << "cd " << directory << " && ";
@@ -297,12 +297,17 @@ int main(int argc, char* argv[]) {
 		if (file_to_analyze.is_open())
 		{
 
+			cp_command_file << "rm -rf compiled_sources" << std::endl;
+			cp_command_file << "mkdir -p compiled_sources" << std::endl;
+
 			while ( getline (file_to_analyze,line) )
 			{
 				if (line.find ("file: ") == 0)
 				{
 					result_file << std::endl << std::endl;
 					result_file << line << std::endl;
+
+					cp_command_file << "cp --parent " << line.substr(6) << " compiled_sources" << std::endl; //"file: " length = 6
 
 					//get path from cd command
 					getline (file_to_analyze,line);
@@ -332,6 +337,8 @@ int main(int argc, char* argv[]) {
 							*/
 							result_file << includeFilesTree[i].path << " ";
 							result_file << std::endl;
+
+							cp_command_file << "cp --parent " << includeFilesTree[i].path << " compiled_sources" << std::endl;
 						}
 					}
 				}
