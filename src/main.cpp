@@ -160,7 +160,15 @@ int main(int argc, char* argv[]) {
 			makefile << "cd " << directory << " && ";
 
 			//read command from json file
-			command = record["command"].GetString();
+			if (record.HasMember("command"))
+			{
+				command = record["command"].GetString();
+			}
+			else
+			{
+				std::cout << "JSON file does not contain \"command\" field" << std::endl;
+				return 0;
+			}
 
 			//write gcc/g++ command instead cc/c++
 			json_compiler_name = command.substr(0,3);
