@@ -160,30 +160,61 @@ int main(int argc, char* argv[]) {
 			makefile << "cd " << directory << " && ";
 
 			//read command from json file
+			int json_has_command_field = 0;
+			command = "";
+
 			if (record.HasMember("command"))
 			{
 				command = record["command"].GetString();
+				json_has_command_field = 1;
+			}
+			else if (record.HasMember("arguments"))
+			{
+				const Value& arguments = record["arguments"];
+				assert(arguments.IsArray());
+				for (SizeType i = 0; i < arguments.Size(); i++) // Uses SizeType instead of size_t
+				{
+					std::string arg = arguments[i].GetString();
+
+					//process "\"" in -D here if record.HasMember("arguments")
+					if (arg.find("-D",0) == 0)
+					{
+						size_t search_start_pos = 0;
+						size_t start_pos = 0;
+						std::string search_pattern = std::string("\"");
+						while ((start_pos = arg.find(search_pattern, search_start_pos)) != std::string::npos)
+						{
+							arg.replace(start_pos,1,"\"\\\"");
+							search_start_pos = start_pos + 3;
+						}
+
+					}
+					command = command + arg + " ";
+				}
 			}
 			else
 			{
-				std::cout << "JSON file does not contain \"command\" field" << std::endl;
+				std::cout << "JSON file does not contain \"command\" field or \"arguments\" field." << std::endl;
 				return 0;
 			}
 
 			//write gcc/g++ command instead cc/c++
-			json_compiler_name = command.substr(0,3);
-			if (json_compiler_name.compare("cc ") == 0)
+			if (json_has_command_field == 1)
 			{
-				makefile << "$(CC)";
-			}
-			else if (json_compiler_name.compare("c++") == 0)
-			{
-				makefile << "$(CXX)";
-			}
-			else
-			{
-				std::cout << "Error. Unknown compiler command in json file: " << json_compiler_name << std::endl;
-				return -1;
+				json_compiler_name = command.substr(0,3);
+				if (json_compiler_name.compare("cc ") == 0)
+				{
+					makefile << "$(CC)";
+				}
+				else if (json_compiler_name.compare("c++") == 0)
+				{
+					makefile << "$(CXX)";
+				}
+				else
+				{
+					std::cout << "Error. Unknown compiler command in json file: " << json_compiler_name << std::endl;
+					return -1;
+				}
 			}
 
 			//show includes that directly comes from gcc command
@@ -209,19 +240,30 @@ int main(int argc, char* argv[]) {
 				direct_includes_file << inc_filename << std::endl;
 			}
 
+			//process "\"" in -D here if record.HasMember("commands")
 			//process \" in macro definition in gcc command (-D=\"Hello World\")
-			search_start_pos = 0;
-			size_t start_pos = 0;
-			search_pattern = std::string("\\\"");
-			while ((start_pos = command.find("\\\"", search_start_pos)) != std::string::npos)
+			if (json_has_command_field == 1)
 			{
-				command.replace(start_pos,2,"\"\\\"");
-				search_start_pos = start_pos + 2;
+				search_start_pos = 0;
+				size_t start_pos = 0;
+				search_pattern = std::string("\\\"");
+				while ((start_pos = command.find("\\\"", search_start_pos)) != std::string::npos)
+				{
+					command.replace(start_pos,2,"\"\\\"");
+					search_start_pos = start_pos + 2;
+				}
 			}
 
 			//write the rest of the command
-			makefile << " ";
-			makefile << command.substr(3);
+			if (json_has_command_field == 1)
+			{
+				makefile << " ";
+				makefile << command.substr(3);
+			}
+			else
+			{
+				makefile << command;
+			}
 			makefile << " -H ";
 			makefile << "-fsyntax-only ";
 			makefile << std::endl;
