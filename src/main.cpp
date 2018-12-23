@@ -57,6 +57,8 @@ int main(int argc, char* argv[]) {
 	int prev_include_file_is_system = 0;
 	std::string target_directory; //path to directory (part of it or full path) that contains analyzed project
 
+	std::ofstream cp_command_file("cp_source_files.sh");
+
 	int i = 0;
 
 	//parse arguments for options
@@ -152,11 +154,17 @@ int main(int argc, char* argv[]) {
 		for (auto& record : a.GetArray()) {
 
 			//makefile << "\t" << "@echo " << i++ << "/" << commandsCount << std::endl;     //to output file number
-			makefile << "\t" << "@echo \"file: " << record["file"].GetString() << "\"" << std::endl;     //to output file number
+
+			std::string file = record["file"].GetString();
+			directory = record["directory"].GetString();
+
+			if (file.find("/") != 0) //relative file name
+				file = directory + "/" + file;
+
+			makefile << "\t" << "@echo \"file: " << file << "\"" << std::endl;     //to output file number
 
 			makefile << "\t";
 
-			directory = record["directory"].GetString();
 			makefile << "cd " << directory << " && ";
 
 			//read command from json file
