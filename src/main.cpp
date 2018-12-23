@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 			in_comp_db_json.close();
 			out_comp_db_json.close();
 		}
-		else std::cout << "Unable to open file";
+		else std::cout << "include-explorer error! Unable to open file:" << json_file_path << std::endl;
 
 
 		//Parse output file by rapidjson.
