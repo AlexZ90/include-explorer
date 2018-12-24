@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
 	std::string prev_include_file_level_str;
 	int prev_include_file_is_system = 0;
 	std::string target_directory; //path to directory (part of it or full path) that contains analyzed project
+	int include_level_to_process = 1; //path to directory (part of it or full path) that contains analyzed project
 
 	std::ofstream cp_command_file("cp_source_files.sh");
 
@@ -83,6 +84,8 @@ int main(int argc, char* argv[]) {
 				analyze_flag = 1;
 				file_to_analyze_path = std::string(argv[i+1]);
 				target_directory = std::string(argv[i+2]);
+				include_level_to_process = atoi(argv[i+3]);
+
 			}
 			else if (argument_str.compare("-h") == 0)
 			{
@@ -328,7 +331,8 @@ int main(int argc, char* argv[]) {
 					{
 						if ((!includeFilesTree[i].is_system) ||
 								(includeFilesTree[i].is_system && (!includeFilesTree[includeFilesTree[i].parent_num].is_system)) ||
-								(includeFilesTree[i].is_system && (includeFilesTree[i].level == 1))
+								(includeFilesTree[i].is_system && (includeFilesTree[i].level == 1)) ||
+								(includeFilesTree[i].level <= include_level_to_process)
 							)
 						{
 							/*debug print
