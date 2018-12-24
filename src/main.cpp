@@ -89,7 +89,8 @@ int main(int argc, char* argv[]) {
 				std::cout << std::endl << "Using: ./include-explorer [-f path/to/json/file/dir/json_file_name.json] [-p compiler_prefix]" << std::endl;
 				std::cout << "-f - full path to json file with compile commands. Default: \"./compile_commands.json\"" << std::endl;
 				std::cout << "-p - full path to compiler prefix. Default: \"\"" << std::endl;
-				std::cout << "-a - analyze result file" << std::endl;
+				std::cout << "-a - analyze result file -a [tmpMakefileResult.txt] [part/of/project/directory/path]" << std::endl;
+				std::cout << "If file path contains part/of/project/directory/path then it supposed that it is in project" << std::endl;
 				std::cout << "Example : ./include-explorer -f test/compile_commands.json -p /opt/arm-linux-gnueabihf/arm-linux-gnueabihf-" << std::endl;
 				std::cout << "Example : ./include-explorer -a ./tmpMakefileResult.txt include-explorer/test" << std::endl << std::endl;
 				return -1;
