@@ -7,6 +7,7 @@
 #include <string>
 #include <cstdlib>
 
+
 using namespace rapidjson;
 
 typedef struct includeFile {
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
 	std::string prev_include_file_level_str;
 	int prev_include_file_is_system = 0;
 	std::string target_directory; //path to directory (part of it or full path) that contains analyzed project
+	int include_level_to_process = 1; //path to directory (part of it or full path) that contains analyzed project
 
 	std::ofstream cp_command_file("cp_source_files.sh");
 
@@ -82,17 +84,37 @@ int main(int argc, char* argv[]) {
 			{
 				analyze_flag = 1;
 				file_to_analyze_path = std::string(argv[i+1]);
-				target_directory = std::string(argv[i+2]);
+			}
+			else if (argument_str.compare("-d") == 0)
+			{
+				if (analyze_flag == 0)
+				{
+					std::cout << "Error: -d option is used only with -a option" << std::endl;
+					return -1;
+				}
+				target_directory = std::string(argv[i+1]);
+			}
+			else if (argument_str.compare("-l") == 0)
+			{
+				if (analyze_flag == 0)
+				{
+					std::cout << "Error: -l option is used only with -a option" << std::endl;
+					return -1;
+				}
+				include_level_to_process = atoi(argv[i+1]);
 			}
 			else if (argument_str.compare("-h") == 0)
 			{
-				std::cout << std::endl << "Using: ./include-explorer [-f path/to/json/file/dir/json_file_name.json] [-p compiler_prefix]" << std::endl;
+				std::cout << std::endl << "Using: ./include-explorer [-f path/to/json/file/dir/json_file_name.json] [-p compiler_prefix] [-a tmpMakefileResult.txt] " << std::endl;
+				std::cout << "[-d part/of/project/directory/path] [-l include]" << std::endl;
 				std::cout << "-f - full path to json file with compile commands. Default: \"./compile_commands.json\"" << std::endl;
 				std::cout << "-p - full path to compiler prefix. Default: \"\"" << std::endl;
-				std::cout << "-a - analyze result file -a [tmpMakefileResult.txt] [part/of/project/directory/path]" << std::endl;
-				std::cout << "If file path contains part/of/project/directory/path then it supposed that it is in project" << std::endl;
+				std::cout << "-a - analyze result file Default: \"./tmpMakefileResult.txt\"" << std::endl;
+				std::cout << "-d - part of project directory path. Default: \"\"" << std::endl;
+				std::cout << "     If some include file path contains part/of/project/directory/path then it is supposed that the file is in the project" << std::endl;
+				std::cout << "-l - level of include file to process. Default: \"1\"" << std::endl;
 				std::cout << "Example : ./include-explorer -f test/compile_commands.json -p /opt/arm-linux-gnueabihf/arm-linux-gnueabihf-" << std::endl;
-				std::cout << "Example : ./include-explorer -a ./tmpMakefileResult.txt include-explorer/test" << std::endl << std::endl;
+				std::cout << "Example : ./include-explorer -a ./tmpMakefileResult.txt -d include-explorer/test -l 1" << std::endl << std::endl;
 				return -1;
 			}
 		}
@@ -328,7 +350,8 @@ int main(int argc, char* argv[]) {
 					{
 						if ((!includeFilesTree[i].is_system) ||
 								(includeFilesTree[i].is_system && (!includeFilesTree[includeFilesTree[i].parent_num].is_system)) ||
-								(includeFilesTree[i].is_system && (includeFilesTree[i].level == 1))
+								(includeFilesTree[i].is_system && (includeFilesTree[i].level == 1)) ||
+								(includeFilesTree[i].level <= include_level_to_process)
 							)
 						{
 							/*debug print
