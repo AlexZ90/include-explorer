@@ -7,6 +7,7 @@
 #include <string>
 #include <cstdlib>
 
+#include "utils.h"
 
 using namespace rapidjson;
 
@@ -60,6 +61,8 @@ int main(int argc, char* argv[]) {
 	int include_level_to_process = 1; //path to directory (part of it or full path) that contains analyzed project
 
 	std::ofstream cp_command_file("cp_source_files.sh");
+
+	langtype filetype = langtype::CLANG;
 
 	int i = 0;
 
@@ -316,6 +319,7 @@ int main(int argc, char* argv[]) {
 		int parent_num = 0;
 
 		file_to_analyze.open(file_to_analyze_path);
+		std::ofstream result_short_file("include-explorer-result-short.txt");
 
 		if (file_to_analyze.is_open())
 		{
@@ -329,6 +333,11 @@ int main(int argc, char* argv[]) {
 				{
 					result_file << std::endl << std::endl;
 					result_file << line << std::endl;
+
+					result_short_file << std::endl << std::endl;
+					result_short_file << line << std::endl;
+
+					filetype = getFileLang(getFileExtension(line));
 
 					cp_command_file << "cp --parent " << line.substr(6) << " compiled_sources" << std::endl; //"file: " length = 6
 
@@ -354,13 +363,84 @@ int main(int argc, char* argv[]) {
 								(includeFilesTree[i].level <= include_level_to_process)
 							)
 						{
+
 							/*debug print
 							result_file << includeFilesTree[i].is_system << " ";
 							result_file << includeFilesTree[i].level << " ";
 							result_file << includeFilesTree[i].parent_num << " ";
 							*/
+
+							std::string filename = getFileName(includeFilesTree[i].path);
+
+							result_short_file << filename << "\t\t\t";
 							result_file << includeFilesTree[i].path << " ";
+
+
+							if (!includeFilesTree[i].is_system)
+							{
+								result_file << "in_project ";
+								result_short_file << "in_project ";
+							}
+							else
+							{
+								result_file << "not_project ";
+								result_short_file << "not_project ";
+							}
+
+							/*define existance of header in std library. start*/
+							//if (includeFilesTree[i].is_system)
+							{
+								bool headerExists = checkLibForHeader(getFileName(includeFilesTree[i].path),filetype);
+								if (headerExists == false)
+								{
+									if (filetype == langtype::CLANG)
+									{
+										headerExists = checkLibForHeader(filename,langtype::CXXLANG);
+										if (headerExists)
+										{
+											result_file << "c_in_std_cxx";
+											result_short_file << "c_in_std_cxx";
+										}
+										else
+										{
+											result_file << "no_std_lib";
+											result_short_file << "no_std_lib";
+										}
+
+									} else if (filetype == langtype::CXXLANG)
+									{
+										headerExists = checkLibForHeader(getFileName(includeFilesTree[i].path),langtype::CLANG);
+										if (headerExists)
+										{
+											result_file << "cxx_in_std_c_";
+											result_short_file << "cxx_in_std_c_";
+										}
+										else
+										{
+											result_file << "no_std_lib";
+											result_short_file << "no_std_lib";
+										}
+									}
+									else
+									{
+										std::cout << __FILE__ << " " << __LINE__ << " " << "Error. Unknown filetype." << std::endl;
+									}
+								}
+								else if (filetype == langtype::CLANG)
+								{
+									result_file << "in_std_c_";
+									result_short_file << "in_std_c_";
+								}
+								else if (filetype == langtype::CXXLANG)
+								{
+									result_file << "in_std_cxx" << std::endl;
+									result_short_file << "in_std_cxx" << std::endl;
+								}
+							}
+							/*define existance of header in std library. end*/
+
 							result_file << std::endl;
+							result_short_file << std::endl;
 
 							cp_command_file << "cp --parent " << includeFilesTree[i].path << " compiled_sources" << std::endl;
 						}
@@ -434,6 +514,11 @@ int main(int argc, char* argv[]) {
 
 			file_to_analyze.close();
 			result_file.close();
+			result_short_file.close();
+
+			system("cat include-explorer-result-short.txt | grep \"in_std_c_\" | sort -u > in_std_c.txt ");
+			system("cat include-explorer-result-short.txt | grep \"in_std_cxx\" | sort -u > in_std_cxx.txt ");
+			system("cat include-explorer-result.txt | grep \"not_project no_std_lib\" | sort -u > not_project.txt ");
 		}
 		else
 		{
