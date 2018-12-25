@@ -1,4 +1,4 @@
-RAPIDJSON_DIR=/home/alex/Downloads/git/rapidjson
+RAPIDJSON_DIR=/home/zalman/Downloads/git/rapidjson
 
 all:
 	mkdir -p bin
@@ -7,7 +7,7 @@ all:
 install:
 	mkdir -p /opt/include-explorer
 	cp bin/include-explorer /opt/include-explorer
-	rm /usr/local/bin/include-explorer
+	rm -f /usr/local/bin/include-explorer
 	ln -s /opt/include-explorer/include-explorer /usr/local/bin/include-explorer
 
 .PHOHY: prepare_test
