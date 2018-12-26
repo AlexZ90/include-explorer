@@ -451,7 +451,8 @@ int main(int argc, char* argv[]) {
 					continue;
 				else //processing include file
 				{
-
+					if (line.find(".") != 0) //take only includes lines starts with '.'
+						continue;
 					//get include file path
 					include_file_start_pos = line.find_first_of(" ",0) + 1;
 					include_file_end_pos = line.find_first_of(" ",include_file_start_pos);
