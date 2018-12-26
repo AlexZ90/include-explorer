@@ -21,6 +21,8 @@ langtype getFileLang(const std::string& extension)
 {
 	if (extension.compare("c") == 0)
 		return langtype::CLANG;
+	if (extension.compare("S") == 0)
+		return langtype::CLANG;
 	else if (extension.compare("cpp") == 0)
 		return langtype::CXXLANG;
 	else
