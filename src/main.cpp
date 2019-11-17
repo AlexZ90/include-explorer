@@ -36,8 +36,9 @@ int main(int argc, char* argv[]) {
 	std::string json_compiler_name = "";
 
 	std::ifstream file_to_analyze;
-	std::ofstream result_file("include-explorer-result.txt");
-	std::ofstream direct_includes_file("include-explorer-direct-includes.txt");
+	std::ofstream result_file;
+	std::ofstream result_short_file;
+	std::ofstream direct_includes_file;
 	std::string file_to_analyze_path = "./tmpMakefileResult.txt";
 	int analyze_flag = 0;
 	int processing_includes = 0;
@@ -60,7 +61,7 @@ int main(int argc, char* argv[]) {
 	std::string target_directory; //path to directory (part of it or full path) that contains analyzed project
 	int include_level_to_process = 1; //path to directory (part of it or full path) that contains analyzed project
 
-	std::ofstream cp_command_file("cp_source_files.sh");
+	std::ofstream cp_command_file;
 
 	langtype filetype = langtype::CLANG;
 
@@ -151,6 +152,12 @@ int main(int argc, char* argv[]) {
 		}
 		else std::cout << "include-explorer error! Unable to open file:" << json_file_path << std::endl;
 
+		direct_includes_file.open("include-explorer-direct-includes.txt");
+		if (!direct_includes_file.is_open())
+		{
+			std::cout << "include-explorer error! Unable to open file:" << "include-explorer-direct-includes.txt" << std::endl;
+			return -1;
+		}
 
 		//Parse output file by rapidjson.
 		//Modify commands by adding cross-compiler name and option -H
@@ -319,7 +326,9 @@ int main(int argc, char* argv[]) {
 		int parent_num = 0;
 
 		file_to_analyze.open(file_to_analyze_path);
-		std::ofstream result_short_file("include-explorer-result-short.txt");
+		result_short_file.open("include-explorer-result-short.txt");
+		result_file.open("include-explorer-result.txt");
+		cp_command_file.open("cp_source_files.sh");
 
 		if (file_to_analyze.is_open())
 		{
